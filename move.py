@@ -25,8 +25,8 @@ def move_downloads_to_target_folder(target_folder, num_items=1):
         print("No downloaded items found.")
         return
 
-    # Sort items by modification time (most recent first)
-    downloaded_items.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+    # Sort items by creation time (most recent first)
+    downloaded_items.sort(key=lambda f: f.stat().st_ctime, reverse=True)
     target_folder = find_target_folder_on_desktop(target_folder)
 
     if not target_folder:
