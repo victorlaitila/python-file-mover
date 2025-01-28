@@ -11,52 +11,53 @@ def find_target_folder_on_desktop(target_folder):
             return os.path.join(root, target_folder)
     return None
 
-def move_downloads_to_target_folder(target_folder, num_files=1):
+def move_downloads_to_target_folder(target_folder, num_items=1):
     downloads_folder = Path.home() / "Downloads"
 
     if not downloads_folder.exists():
         print(f"Error: The Downloads folder '{downloads_folder}' does not exist.")
         return
 
-    # Get the list of downloaded files (excluding hidden files)
-    downloaded_files = [f for f in downloads_folder.iterdir() if f.is_file() and not f.name.startswith(".")]
+    # Get the list of downloaded files and folders (excluding hidden ones)
+    downloaded_items = [f for f in downloads_folder.iterdir() if not f.name.startswith(".")]
 
-    if not downloaded_files:
-        print("No downloaded files found.")
+    if not downloaded_items:
+        print("No downloaded items found.")
         return
 
-    # Sort files by modification time (most recent first)
-    downloaded_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+    # Sort items by modification time (most recent first)
+    downloaded_items.sort(key=lambda f: f.stat().st_mtime, reverse=True)
     target_folder = find_target_folder_on_desktop(target_folder)
 
     if not target_folder:
         print(f"Error: The folder '{target_folder}' was not found on the Desktop or its subfolders.")
         return
 
-    # Confirm the action if more than 5 files are to be moved
-    if num_files > 5:
-        confirm = input(f"Warning: You are about to move {num_files} files. Are you sure you want to continue? (yes/no): ")
+    # Confirm the action if more than 5 items are to be moved
+    if num_items > 5:
+        confirm = input(f"Warning: You are about to move {num_items} items. Are you sure you want to continue? (yes/no): ")
         if confirm.lower() != 'yes':
             print("Action aborted.")
             return
 
-    files_moved = 0
-    for i in range(min(num_files, len(downloaded_files))):
+    # Attempt to move the latest 'num_items' items
+    items_moved = 0
+    for i in range(min(num_items, len(downloaded_items))):
         try:
-            shutil.move(str(downloaded_files[i]), target_folder)
-            files_moved += 1
+            shutil.move(str(downloaded_items[i]), target_folder)
+            items_moved += 1
         except Exception as e:
-            print(f"Error while moving the file '{downloaded_files[i]}': {e}")
+            print(f"Error while moving the item '{downloaded_items[i]}': {e}")
 
-    if files_moved > 0:
-        print(f"Successfully moved {files_moved} file(s) to '{target_folder}'.")
+    if items_moved > 0:
+        print(f"Successfully moved {items_moved} item(s) to '{target_folder}'.")
     else:
-        print("No files were moved.")
+        print("No items were moved.")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or len(sys.argv) > 3:
-        print("Usage: python move.py <target_folder> [num_files]")
+        print("Usage: python move.py <target_folder> [num_items]")
     else:
         target_folder = sys.argv[1]
-        num_files = int(sys.argv[2]) if len(sys.argv) == 3 else 1
-        move_downloads_to_target_folder(target_folder, num_files)
+        num_items = int(sys.argv[2]) if len(sys.argv) == 3 else 1
+        move_downloads_to_target_folder(target_folder, num_items)
