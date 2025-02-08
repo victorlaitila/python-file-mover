@@ -11,9 +11,10 @@ def find_target_folder_on_desktop(target_folder):
             return os.path.join(root, target_folder)
     return None
 
-def move_downloads_to_target_folder(target_folder, num_items=1):
+def move_downloads_to_target_folder(target_folder=None, num_items=1):
     downloads_folder = Path.home() / "Downloads"
-
+    desktop_folder = Path.home() / "Desktop"
+    
     if not downloads_folder.exists():
         print(f"Error: The Downloads folder '{downloads_folder}' does not exist.")
         return
@@ -27,12 +28,15 @@ def move_downloads_to_target_folder(target_folder, num_items=1):
 
     # Sort items by creation time (most recent first)
     downloaded_items.sort(key=lambda f: f.stat().st_ctime, reverse=True)
-    target_folder = find_target_folder_on_desktop(target_folder)
-
-    if not target_folder:
-        print(f"Error: The folder '{target_folder}' was not found on the Desktop or its subfolders.")
-        return
-
+    
+    if target_folder:
+        target_folder = find_target_folder_on_desktop(target_folder)
+        if not target_folder:
+            print(f"Error: The folder '{target_folder}' was not found on the Desktop or its subfolders.")
+            return
+    else:
+        target_folder = desktop_folder  # Default to Desktop if no folder is specified
+    
     # Confirm the action if more than 5 items are to be moved
     if num_items > 5:
         confirm = input(f"Warning: You are about to move {num_items} items. Are you sure you want to continue? (yes/no): ")
@@ -55,9 +59,10 @@ def move_downloads_to_target_folder(target_folder, num_items=1):
         print("No items were moved.")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2 or len(sys.argv) > 3:
-        print("Usage: python move.py <target_folder> [num_items]")
+    num_args = len(sys.argv)
+    if num_args > 3:
+        print("Usage: python move.py [target_folder] [num_items]")
     else:
-        target_folder = sys.argv[1]
-        num_items = int(sys.argv[2]) if len(sys.argv) == 3 else 1
+        target_folder = sys.argv[1] if num_args > 1 else None
+        num_items = int(sys.argv[2]) if num_args == 3 else 1
         move_downloads_to_target_folder(target_folder, num_items)
